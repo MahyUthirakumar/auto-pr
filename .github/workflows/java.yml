@@ -13,6 +13,7 @@ on:
     branches: [ "qa" ]
   pull_request:
     branches: [ "qa" ]
+  workflow_dispatch:
 
 jobs:
   build:
