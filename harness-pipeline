@@ -1,0 +1,173 @@
+pipeline:
+  name: harness-test
+  identifier: harnesstest
+  projectIdentifier: Foundation_Technologies_Platform_Integration_Services
+  orgIdentifier: GDDT
+  tags: {}
+  stages:
+    - stage:
+        name: create-pr
+        identifier: createpr
+        description: ""
+        type: CI
+        spec:
+          cloneCodebase: false
+          infrastructure:
+            type: KubernetesDirect
+            spec:
+              connectorRef: k8sconnector
+              namespace: harness-delegate-ng
+              automountServiceAccountToken: true
+              nodeSelector: {}
+              os: Linux
+          execution:
+            steps:
+              - step:
+                  type: Run
+                  name: Run_1
+                  identifier: Run_1
+                  spec:
+                    connectorRef: account.harnessImage
+                    image: ubuntu
+                    shell: Bash
+                    command: |-
+                      apt-get update
+
+                      echo "install git"
+                      apt-get install git -y
+
+
+                      echo "install githubCLI"
+                      apt-get install gh
+
+                      export GITHUB_TOKEN=<+secrets.getValue("github-actions")>
+
+
+
+                      gh repo clone auto-pr
+
+
+                      echo "Repo Clone"
+                      REPO="https://github.com/MahyUthirakumar/auto-pr.git"
+                      SOURCE_BRANCH="dev"
+                      TARGET_BRANCH="qa"
+                      PR_TITLE="Merge dev into qa"
+                      PR_BODY="This PR contains the changes from the dev branch to the qa branch."
+
+                      # # Clone the repository
+                      # git clone $REPO
+                      # cd your-repo
+
+                      # # Fetch all branches
+                      # echo "fetch origin"
+                      # git fetch origin
+
+                      # Create PR using GitHub CLI or API
+
+                      echo "create PR"
+                      gh pr create --base $TARGET_BRANCH --head $SOURCE_BRANCH --title "$PR_TITLE" --body "$PR_BODY" --repo $REPO
+    - stage:
+        name: approve-pr
+        identifier: approvepr
+        description: ""
+        type: CI
+        spec:
+          cloneCodebase: false
+          infrastructure:
+            type: KubernetesDirect
+            spec:
+              connectorRef: k8sconnector
+              namespace: harness-delegate-ng
+              automountServiceAccountToken: true
+              nodeSelector: {}
+              os: Linux
+          execution:
+            steps:
+              - step:
+                  type: Run
+                  name: Run_1
+                  identifier: Run_1
+                  spec:
+                    connectorRef: account.harnessImage
+                    image: ubuntu
+                    shell: Bash
+                    command: |-
+                      apt-get update
+
+                      echo "install git"
+                      apt-get install git -y
+
+
+                      echo "install githubCLI"
+                      apt-get install gh
+
+                      export GITHUB_TOKEN=<+secrets.getValue("github-actions")>
+
+
+
+                      gh repo clone auto-pr
+
+                      echo "Repo Clone"
+                      REPO="MahyUthirakumar/auto-pr"
+                      SOURCE_BRANCH="dev"
+                      TARGET_BRANCH="qa"
+                      PR_TITLE="Merge test into qa"
+                      PR_BODY="This PR contains the changes from the dev branch to the qa branch."
+
+                      PR_ID=$(gh pr list --repo MahyUthirakumar/auto-pr --head dev --state open --json number -q '.[0].number')
+                      echo "PR ID TEST"
+                      echo $PR_ID
+
+                      gh pr merge $PR_ID --merge --repo MahyUthirakumar/auto-pr
+    - stage:
+        name: approval-stage
+        identifier: approvalstage
+        description: ""
+        type: Approval
+        spec:
+          execution:
+            steps:
+              - step:
+                  name: approval-stage
+                  identifier: approvalstage
+                  type: HarnessApproval
+                  timeout: 1d
+                  spec:
+                    approvalMessage: |-
+                      Please review the following information
+                      and approve the pipeline progression
+                    includePipelineExecutionHistory: true
+                    approvers:
+                      minimumCount: 1
+                      disallowPipelineExecutor: false
+                      userGroups:
+                        - account._account_all_users
+                    isAutoRejectEnabled: false
+                    approverInputs: []
+    - stage:
+        name: call-github-actions
+        identifier: callgithubactions
+        description: ""
+        type: CI
+        spec:
+          cloneCodebase: false
+          infrastructure:
+            type: KubernetesDirect
+            spec:
+              connectorRef: k8sconnector
+              namespace: harness-delegate-ng
+              automountServiceAccountToken: true
+              nodeSelector: {}
+              os: Linux
+          execution:
+            steps:
+              - step:
+                  type: Plugin
+                  name: hello world
+                  identifier: hello_world
+                  spec:
+                    connectorRef: harness-test-docker
+                    image: plugins/github-actions
+                    privileged: true
+                    settings:
+                      uses: auto-pr/action@main
