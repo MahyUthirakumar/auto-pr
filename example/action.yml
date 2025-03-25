@@ -9,7 +9,7 @@ runs:
   using: "composite"
 jobs:
   basic:
-    runs-on: ubuntu-latest
+   # runs-on: ubuntu-latest
     steps:
       - name: Print
         run: echo "Hi"
