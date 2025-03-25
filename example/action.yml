@@ -6,7 +6,7 @@ on:
       - 'master'
   workflow_dispatch:
 runs:
-  using: "docker"
+  using: "ubuntu-latest"
 jobs:
   basic:
    # runs-on: ubuntu-latest
