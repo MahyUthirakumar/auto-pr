@@ -5,9 +5,11 @@ on:
     branches:
       - 'master'
   workflow_dispatch:
+#runs:
+  #using: "node20"
 jobs:
   basic:
-    runs-on: ubuntu-latest
+    runs-on: composite
     steps:
       - name: Print
         run: echo "Hi"
