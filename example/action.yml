@@ -6,10 +6,8 @@ on:
       - 'master'
   workflow_dispatch:
 runs:
-  using: "ubuntu-latest"
-jobs:
-  basic:
+  using: "composite"
    # runs-on: ubuntu-latest
-    steps:
-      - name: Print
-        run: echo "Hi"
+  steps:
+    - name: Print
+      run: echo "Hi"
