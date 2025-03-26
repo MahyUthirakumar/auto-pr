@@ -8,7 +8,11 @@ on:
   pull_request:
     branches:
       - qa
-  workflow_dispatch:    
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Commit SHA to run the workflow on"
+        required: true
 # Define the jobs in the pipeline
 jobs:
   print_hello_world:
